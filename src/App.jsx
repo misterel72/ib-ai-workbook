@@ -439,6 +439,7 @@ function AuthForm() {
     );
 }
 
+// --- Live Quiz Generator Component (UPDATED) ---
 function LiveQuizGenerator() {
     console.log("LiveQuizGenerator rendering..."); 
     const [topic, setTopic] = useState('');
@@ -447,14 +448,46 @@ function LiveQuizGenerator() {
     const [error, setError] = useState('');
     const [currentView, setCurrentView] = useState('form'); 
 
-    const handleGenerateQuiz = async (quizTopic, numMCQ = 2, numSAQ = 1) => { 
+    const [numQuestions, setNumQuestions] = useState(3); 
+    const [questionTypePref, setQuestionTypePref] = useState('mix'); 
+
+    const handleGenerateQuiz = async () => { // Removed parameters, will use state
+        const quizTopic = topic; // Use state topic
         if (!quizTopic.trim()) {
             setError('Please enter a topic for the quiz.');
             return;
         }
+        if (numQuestions <= 0 || numQuestions > 10) { 
+            setError('Please enter a number of questions between 1 and 10.');
+            return;
+        }
+
         setIsLoading(true);
         setError('');
         setGeneratedQuiz(null); 
+
+        let reqNumMCQs = 0;
+        let reqNumSAQs = 0;
+
+        if (questionTypePref === 'mcq_only') {
+            reqNumMCQs = numQuestions;
+        } else if (questionTypePref === 'saq_only') {
+            reqNumSAQs = numQuestions;
+        } else { 
+            reqNumMCQs = Math.ceil(numQuestions / 2);
+            reqNumSAQs = Math.floor(numQuestions / 2);
+            if (reqNumMCQs + reqNumSAQs < numQuestions && numQuestions > 0) { 
+                reqNumMCQs++; 
+            }
+             if (numQuestions === 1 && reqNumSAQs === 0 && reqNumMCQs === 0) reqNumMCQs = 1; 
+             else if (numQuestions === 1 && reqNumMCQs === 0 && reqNumSAQs === 0) reqNumSAQs = 1;
+        }
+        
+        if (numQuestions > 0 && reqNumMCQs === 0 && reqNumSAQs === 0) {
+             reqNumMCQs = numQuestions;
+        }
+
+        console.log(`LiveQuizGenerator: Requesting ${reqNumMCQs} MCQs and ${reqNumSAQs} SAQs for topic: ${quizTopic}`);
 
         try {
             const response = await fetch('/.netlify/functions/generate-quiz', {
@@ -462,11 +495,16 @@ function LiveQuizGenerator() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ topic: quizTopic, numMCQs: numMCQ, numSAQs: numSAQ }),
+                body: JSON.stringify({ topic: quizTopic, numMCQs: reqNumMCQs, numSAQs: reqNumSAQs }),
             });
 
             if (!response.ok) {
-                const errData = await response.json();
+                let errData;
+                try {
+                    errData = await response.json();
+                } catch(e) {
+                    errData = { error: await response.text() || `Quiz generation failed with status: ${response.status}`};
+                }
                 throw new Error(errData.error || `Quiz generation failed with status: ${response.status}`);
             }
 
@@ -475,12 +513,12 @@ function LiveQuizGenerator() {
             if (data.quiz && data.quiz.questions && data.quiz.questions.length > 0) {
                 const questionsWithIds = data.quiz.questions.map((q, index) => ({
                     ...q,
-                    id: q.id || `live-q-${topic.replace(/\s+/g, '-')}-${index}` 
+                    id: q.id || `live-q-${quizTopic.replace(/\s+/g, '-')}-${index}` 
                 }));
                 setGeneratedQuiz({ ...data.quiz, questions: questionsWithIds, title: `Live Quiz: ${quizTopic}` }); 
                 setCurrentView('quiz'); 
             } else {
-                throw new Error('Generated quiz data is not in the expected format or is empty.');
+                throw new Error('Generated quiz data is not in the expected format or is empty. Gemini might not have been able to fulfill the request for the given topic and question types/numbers.');
             }
         } catch (err) {
             console.error("Error generating live quiz:", err);
@@ -497,10 +535,11 @@ function LiveQuizGenerator() {
                     quiz={generatedQuiz} 
                     onBackToLessons={() => { 
                         setGeneratedQuiz(null);
-                        setTopic(''); 
+                        // setTopic(''); // Keep topic for potentially re-generating with different settings
                         setCurrentView('form');
                     }} 
                     isLiveQuiz={true} 
+                    moduleTitle={`Live Quiz: ${topic}`} // Pass current topic as moduleTitle for QuizView
                  />
             </div>
         );
@@ -512,26 +551,58 @@ function LiveQuizGenerator() {
                 <Wand2 size={28} className="mr-3 text-purple-400" />
                 Live Quiz Generator (Ad-hoc)
             </h3>
-            <p className="text-sm text-slate-400 mb-4">Enter any topic from Digital Society to generate a quick practice quiz!</p>
+            <p className="text-sm text-slate-400 mb-4">Enter any topic, choose question types and number, then generate a practice quiz!</p>
             
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <input
-                    type="text"
-                    value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
-                    placeholder="e.g., Algorithmic Bias, AI Ethics"
-                    className="flex-grow p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                />
-                <button
-                    onClick={() => handleGenerateQuiz(topic)} 
-                    disabled={isLoading || !topic.trim()}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center disabled:opacity-50"
-                >
-                    {isLoading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : <Wand2 size={20} className="mr-2" />}
-                    {isLoading ? 'Generating...' : 'Generate Quiz'}
-                </button>
+            <div className="space-y-4 mb-4">
+                <div>
+                    <label htmlFor="quizTopic" className="block text-sm font-medium text-slate-300 mb-1">Topic</label>
+                    <input
+                        id="quizTopic"
+                        type="text"
+                        value={topic}
+                        onChange={(e) => setTopic(e.target.value)}
+                        placeholder="e.g., Algorithmic Bias, Data Privacy"
+                        className="w-full p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                        <label htmlFor="questionType" className="block text-sm font-medium text-slate-300 mb-1">Question Types</label>
+                        <select
+                            id="questionType"
+                            value={questionTypePref}
+                            onChange={(e) => setQuestionTypePref(e.target.value)}
+                            className="w-full p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                        >
+                            <option value="mix">Mixed (MCQ & Short Answer)</option>
+                            <option value="mcq_only">Multiple Choice Only</option>
+                            <option value="saq_only">Short Answer Only</option>
+                        </select>
+                    </div>
+                    <div className="sm:w-1/3">
+                        <label htmlFor="numQuestions" className="block text-sm font-medium text-slate-300 mb-1">Number of Questions</label>
+                        <input
+                            id="numQuestions"
+                            type="number"
+                            value={numQuestions}
+                            onChange={(e) => setNumQuestions(Math.max(1, Math.min(10, parseInt(e.target.value, 10))) || 1)} 
+                            min="1"
+                            max="10" 
+                            className="w-full p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                        />
+                    </div>
+                </div>
             </div>
-            {error && <p className="text-sm text-red-400 bg-red-900/30 p-2 rounded-md">{error}</p>}
+            
+            <button
+                onClick={handleGenerateQuiz}
+                disabled={isLoading || !topic.trim()}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center disabled:opacity-50"
+            >
+                {isLoading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : <Wand2 size={20} className="mr-2" />}
+                {isLoading ? 'Generating...' : 'Generate Quiz'}
+            </button>
+            {error && <p className="mt-4 text-sm text-red-400 bg-red-900/30 p-2 rounded-md">{error}</p>}
         </div>
     );
 }
@@ -751,7 +822,7 @@ function Dashboard({ modules, onSelectModule, userData }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {modules.map(module => {
           const Icon = module.icon || Lightbulb;
-          const isModuleCompleted = !module.quizType && userData?.completedQuizzes?.some(q => q.quizId === module.quiz.id); // Only for static quizzes
+          const isModuleCompleted = !module.quizType && userData?.completedQuizzes?.some(q => q.quizId === module.quiz.id); 
           return (
             <div
               key={module.id}
@@ -775,10 +846,10 @@ function Dashboard({ modules, onSelectModule, userData }) {
 
 function ModuleView({ module, onGenerateLiveQuiz }) { 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [showQuiz, setShowQuiz] = useState(false); // For static quizzes
+  const [showQuiz, setShowQuiz] = useState(false); 
   const { userData, markLessonCompleted } = useContext(UserDataContext);
 
-  useEffect(() => { // Reset when module changes
+  useEffect(() => { 
     setCurrentLessonIndex(0);
     setShowQuiz(false);
   }, [module]);
@@ -795,11 +866,10 @@ function ModuleView({ module, onGenerateLiveQuiz }) {
       if (module.quizType === 'live' && module.quizTopic) {
           console.log("ModuleView: Triggering live quiz generation for topic:", module.quizTopic);
           onGenerateLiveQuiz(module.quizTopic, module.id, module.title); 
-      } else if (module.quiz) { // Check if a static quiz exists
+      } else if (module.quiz) { 
           setShowQuiz(true); 
       } else {
           console.log("ModuleView: No quiz defined for this module or not a live quiz type.");
-          // Optionally, navigate back to dashboard or show a "Module Complete" message
       }
     }
   };
@@ -841,7 +911,7 @@ function ModuleView({ module, onGenerateLiveQuiz }) {
       <div className="flex justify-between items-center">
         <button
           onClick={handlePrevLesson}
-          disabled={currentLessonIndex === 0 && !showQuiz} // showQuiz condition might be irrelevant now
+          disabled={currentLessonIndex === 0}
           className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           <ChevronLeft size={20} className="mr-1" /> Previous
@@ -877,7 +947,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
 
   if (isGenerating) {
       return (
-          <div className="p-6 text-slate-300 flex flex-col items-center justify-center min-h-[calc(100vh-150px)]"> {/* Ensure it takes height */}
+          <div className="p-6 text-slate-300 flex flex-col items-center justify-center min-h-[calc(100vh-150px)]"> 
               <Loader2 className="animate-spin h-12 w-12 text-sky-400 mb-4" />
               Generating your live quiz on "{moduleTitle || quiz?.title || 'the selected topic'}"... Please wait.
           </div>
@@ -938,13 +1008,13 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
     let score = 0;
     quiz?.questions?.forEach(q => { 
       const questionKey = q.id || `q-${quiz.questions.indexOf(q)}`;
-      const questionPoints = q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0)); // Default points
+      const questionPoints = q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0)); 
 
       if (q.type === 'mcq') {
         if (answers[questionKey] === q.correctAnswer) {
           score += questionPoints; 
         }
-      } else if (q.type === 'saq') { // Changed from 'shortAnswer' to 'saq' to match Netlify function prompt
+      } else if (q.type === 'saq') { 
         const questionFeedback = feedback[questionKey];
         if (questionFeedback && typeof questionFeedback === 'string') {
             const match = questionFeedback.match(/Suggested Mark: (\d+)\/(\d+)/);
@@ -966,8 +1036,6 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
     const finalScore = calculateScore();
     const totalPossibleScore = quiz?.questions?.reduce((sum, q) => sum + (q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0))), 0) || 0; 
     
-    // For predefined quizzes, `quiz.points` refers to the overall points for completing the *module quiz section*.
-    // For live quizzes, this specific `quiz.points` field won't exist on the generated quiz object.
     if (!isLiveQuiz && quiz.id && modulesData.find(m => m.quiz?.id === quiz.id)?.quiz?.points) { 
         const predefinedQuizOverallPoints = modulesData.find(m => m.quiz.id === quiz.id).quiz.points;
         const scoreDataToStore = { score: finalScore, total: totalPossibleScore };
@@ -1109,7 +1177,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
             ))}
           </div>
         )}
-        {currentQuestion.type === 'saq' && ( // Changed from 'shortAnswer'
+        {currentQuestion.type === 'saq' && ( 
           <div>
             <textarea
               value={answers[questionKey] || ''}
@@ -1178,7 +1246,7 @@ function App() {
     setIsGeneratingModuleQuiz(true);
     setLiveModuleQuiz(null); 
     setCurrentLiveQuizModuleInfo({ id: moduleId, title: moduleTitle }); 
-    setSelectedModule(null); // Deselect module to show quiz view directly
+    setSelectedModule(null); 
 
     try {
         const response = await fetch('/.netlify/functions/generate-quiz', {
@@ -1229,7 +1297,6 @@ function App() {
       return <AuthForm />;
   }
 
-  // If a live module quiz is being generated or is ready to be shown
   if (isGeneratingModuleQuiz || liveModuleQuiz) {
       return (
         <div className="flex flex-col h-screen bg-slate-900 text-white font-sans overflow-hidden">
