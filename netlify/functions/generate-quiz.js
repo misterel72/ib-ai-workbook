@@ -1,60 +1,31 @@
 // netlify/functions/generate-quiz.js
 
-// Using global fetch, available in modern Node.js runtimes on Netlify
-// If you encounter issues and Netlify logs mention fetch is not defined,
-// you might need to install 'node-fetch': npm install node-fetch
-// and then uncomment the next line:
-// const fetch = require('node-fetch'); 
-
 exports.handler = async function(event, context) {
-    // Only allow POST requests
+    // ... (HTTP method check, API key check, request body parsing - same as before) ...
     if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ error: 'Method Not Allowed' }),
-            headers: { 'Content-Type': 'application/json' },
-        };
+        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
-
     const { GEMINI_API_KEY } = process.env;
     if (!GEMINI_API_KEY) {
-        console.error("Netlify Function 'generate-quiz': Gemini API key is not set in environment variables.");
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'API key not configured on the server.' }),
-            headers: { 'Content-Type': 'application/json' },
-        };
+        console.error("Netlify Function 'generate-quiz': Gemini API key is not set.");
+        return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured.' }) };
     }
-
     let topic;
-    let numQuestions = 3; // Default number of questions
-
+    let numQuestions = 3;
     try {
         const body = JSON.parse(event.body);
         topic = body.topic;
-        if (body.numQuestions && parseInt(body.numQuestions) > 0) {
-            numQuestions = parseInt(body.numQuestions);
-        }
-
+        if (body.numQuestions && parseInt(body.numQuestions) > 0) numQuestions = parseInt(body.numQuestions);
         if (!topic || typeof topic !== 'string' || topic.trim() === "") {
-            console.error("Netlify Function 'generate-quiz': Topic is missing or invalid.");
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Topic is required and must be a non-empty string.' }),
-                headers: { 'Content-Type': 'application/json' },
-            };
+            console.error("Netlify Function 'generate-quiz': Topic missing or invalid.");
+            return { statusCode: 400, body: JSON.stringify({ error: 'Topic is required.' }) };
         }
     } catch (e) {
         console.error("Netlify Function 'generate-quiz': Error parsing request body:", e);
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid request body. Expecting JSON with a "topic" field.' }),
-            headers: { 'Content-Type': 'application/json' },
-        };
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body.' }) };
     }
 
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
     const prompt = `
 Generate an array of ${numQuestions} unique quiz questions suitable for an IB Digital Society student on the topic of "${topic}".
 Each question should be multiple-choice with exactly 4 distinct options.
@@ -81,53 +52,84 @@ Example of one question object:
 `;
 
     const requestBody = {
-        contents: [{
-            parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-            // temperature: 0.7, // Example, uncomment to use
-            // maxOutputTokens: 1024, // Example, uncomment to use
-        }
+        contents: [{ parts: [{ text: prompt }] }],
+        // It might be useful to ask Gemini to output JSON directly if the model supports it
+        // generationConfig: {
+        //    responseMimeType: "application/json",
+        // }
     };
 
     try {
-        console.log(`Netlify Function 'generate-quiz': Sending request to Gemini for topic "${topic}"`);
+        console.log(`Netlify Function 'generate-quiz': Sending request for topic "${topic}"`);
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
             const errorBody = await response.text(); 
-            console.error(`Netlify Function 'generate-quiz': Gemini API request failed with status ${response.status}:`, errorBody);
-            throw new Error(`Gemini API request failed with status ${response.status}. Response: ${errorBody}`);
+            console.error(`Gemini API request failed with status ${response.status}:`, errorBody);
+            throw new Error(`Gemini API request failed: ${response.status}. ${errorBody}`);
         }
 
         const data = await response.json();
-        console.log("Netlify Function 'generate-quiz': Raw response from Gemini:", JSON.stringify(data, null, 2));
+        console.log("Raw response object from Gemini:", JSON.stringify(data, null, 2));
 
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-            console.error("Netlify Function 'generate-quiz': Unexpected response structure from Gemini API:", data);
+            console.error("Unexpected response structure from Gemini API:", data);
             throw new Error('Unexpected response structure from Gemini API.');
         }
 
-        const geminiResponseText = data.candidates[0].content.parts[0].text;
+        let geminiResponseText = data.candidates[0].content.parts[0].text;
+        console.log("Raw text from Gemini candidate part (before cleaning):", geminiResponseText);
+
+        // **More Robust JSON Extraction Logic**
+        const match = geminiResponseText.match(/```json\s*([\s\S]*?)\s*```|([\s\S]*)/);
+        let cleanedJsonText = "";
+        if (match) {
+            // If ```json ... ``` is found, use the content inside.
+            // Otherwise, assume the whole string might be JSON (or try to find an array/object).
+            cleanedJsonText = match[1] ? match[1].trim() : match[2].trim();
+        } else {
+            // Fallback if regex doesn't match as expected (shouldn't happen with the current regex)
+            cleanedJsonText = geminiResponseText.trim();
+        }
+        
+        // Second pass: if it's still not starting with [ or {, try to find the first [ or {
+        if (!cleanedJsonText.startsWith('[') && !cleanedJsonText.startsWith('{')) {
+            const firstBracket = cleanedJsonText.indexOf('[');
+            const firstBrace = cleanedJsonText.indexOf('{');
+
+            if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+                cleanedJsonText = cleanedJsonText.substring(firstBracket);
+            } else if (firstBrace !== -1) {
+                cleanedJsonText = cleanedJsonText.substring(firstBrace);
+            }
+        }
+        // And ensure it ends correctly if it started with a bracket/brace
+        if (cleanedJsonText.startsWith('[') && !cleanedJsonText.endsWith(']')) {
+            const lastBracket = cleanedJsonText.lastIndexOf(']');
+            if (lastBracket !== -1) cleanedJsonText = cleanedJsonText.substring(0, lastBracket + 1);
+        } else if (cleanedJsonText.startsWith('{') && !cleanedJsonText.endsWith('}')) {
+            const lastBrace = cleanedJsonText.lastIndexOf('}');
+            if (lastBrace !== -1) cleanedJsonText = cleanedJsonText.substring(0, lastBrace + 1);
+        }
+
+        console.log("Text after attempting to clean for JSON parsing:", cleanedJsonText);
         
         let quizQuestions;
         try {
-            quizQuestions = JSON.parse(geminiResponseText);
+            quizQuestions = JSON.parse(cleanedJsonText);
         } catch (parseError) {
-            console.error("Netlify Function 'generate-quiz': Failed to parse Gemini response as JSON:", parseError);
-            console.error("Gemini Raw Text was:", geminiResponseText);
-            throw new Error('Gemini response was not valid JSON. Check the prompt and model output.');
+            console.error("Failed to parse cleaned Gemini response as JSON:", parseError);
+            console.error("Cleaned Gemini text that failed parsing:", cleanedJsonText); // Log the problematic text
+            throw new Error('Gemini response, even after cleaning, was not valid JSON.');
         }
 
         if (!Array.isArray(quizQuestions) || quizQuestions.some(q => !q.text || !q.options || q.options.length !== 4 || !q.correctAnswer)) {
-            console.error("Netlify Function 'generate-quiz': Parsed JSON is not a valid quiz structure or questions are malformed:", quizQuestions);
-            throw new Error('Generated content is not a valid quiz structure or questions are malformed.');
+            console.error("Parsed JSON is not a valid quiz structure or questions malformed:", quizQuestions);
+            throw new Error('Generated content is not a valid quiz structure.');
         }
 
         return {
@@ -145,7 +147,7 @@ Example of one question object:
         console.error("Netlify Function 'generate-quiz': Error processing request:", error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: error.message || 'Failed to generate quiz due to an internal server error.' }),
+            body: JSON.stringify({ error: error.message || 'Failed to generate quiz.' }),
             headers: { 'Content-Type': 'application/json' },
         };
     }
