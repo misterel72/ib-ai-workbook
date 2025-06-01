@@ -447,7 +447,7 @@ function LiveQuizGenerator() {
     const [error, setError] = useState('');
     const [currentView, setCurrentView] = useState('form'); 
 
-    const handleGenerateQuiz = async (quizTopic, numMCQ = 2, numSAQ = 1) => { // Added parameters for more control
+    const handleGenerateQuiz = async (quizTopic, numMCQ = 2, numSAQ = 1) => { 
         if (!quizTopic.trim()) {
             setError('Please enter a topic for the quiz.');
             return;
@@ -477,7 +477,7 @@ function LiveQuizGenerator() {
                     ...q,
                     id: q.id || `live-q-${topic.replace(/\s+/g, '-')}-${index}` 
                 }));
-                setGeneratedQuiz({ ...data.quiz, questions: questionsWithIds, title: `Live Quiz: ${quizTopic}` }); // Ensure title is set
+                setGeneratedQuiz({ ...data.quiz, questions: questionsWithIds, title: `Live Quiz: ${quizTopic}` }); 
                 setCurrentView('quiz'); 
             } else {
                 throw new Error('Generated quiz data is not in the expected format or is empty.');
@@ -495,12 +495,12 @@ function LiveQuizGenerator() {
             <div className="bg-slate-700 p-6 rounded-xl shadow-lg mt-8">
                  <QuizView 
                     quiz={generatedQuiz} 
-                    onBackToLessons={() => { // This will be "Back to Quiz Generator" or "Back to Module"
+                    onBackToLessons={() => { 
                         setGeneratedQuiz(null);
                         setTopic(''); 
                         setCurrentView('form');
                     }} 
-                    isLiveQuiz={true} // Crucial: identifies this as a live, non-module quiz
+                    isLiveQuiz={true} 
                  />
             </div>
         );
@@ -523,7 +523,7 @@ function LiveQuizGenerator() {
                     className="flex-grow p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                 />
                 <button
-                    onClick={() => handleGenerateQuiz(topic)} // Pass current topic
+                    onClick={() => handleGenerateQuiz(topic)} 
                     disabled={isLoading || !topic.trim()}
                     className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center disabled:opacity-50"
                 >
@@ -537,16 +537,14 @@ function LiveQuizGenerator() {
 }
 
 
-// --- Updated modulesData ---
 const modulesData = [
   {
     id: 'intro-ai',
     title: 'Introduction to Artificial Intelligence',
     description: 'Understand the fundamental concepts of AI, its types, and its evolution. Features a dynamically generated quiz.',
     icon: Brain,
-    quizType: 'live', // <<< Indicates a live quiz
-    quizTopic: 'The Core Concepts and Types of Artificial Intelligence', // <<< Topic for this module's live quiz
-    // No 'quiz' object with predefined questions needed here anymore
+    quizType: 'live', 
+    quizTopic: 'The Core Concepts and Types of Artificial Intelligence', 
     lessons: [
       { id: 'intro-ai-what-is-ai', title: 'What is AI?', type: 'theory', points: 10, content: `
         <p>Artificial Intelligence (AI) involves creating systems or agents that can perform tasks traditionally requiring human intelligence. This includes abilities like learning, problem-solving, decision-making, and understanding language.</p>
@@ -576,21 +574,17 @@ const modulesData = [
         <h3 class="text-xl font-semibold mt-4 mb-2 text-sky-400">Domain-Specific AI</h3>
         <p>This is a subset of Narrow AI that excels in a particular area, sometimes even surpassing human capabilities within that specific domain. For example, AI systems for medical diagnosis (like detecting cancer from scans) or AI playing complex games (like AlphaGo).</p>
       `},
-      // ... other lessons for this module ...
     ]
-    // Removed the static 'quiz' object from here
   },
-  // ... You can add more modules here, some with static quizzes, some live ...
   {
     id: 'ml-basics',
     title: 'Machine Learning Basics',
     description: 'Explore the fundamentals of machine learning, including supervised, unsupervised, and reinforcement learning.',
-    icon: Lightbulb, // Example icon
-    // This module could still use a static quiz, or also be converted to live
+    icon: Lightbulb, 
     lessons: [ 
         { id: 'ml-what-is-ml', title: 'What is Machine Learning?', type: 'theory', points: 10, content: `<p>Machine learning is a subset of AI...</p>`},
     ],
-    quiz: { // Example of a module still using a static quiz
+    quiz: { 
       id: 'quiz-ml-basics',
       title: 'ML Basics Quiz',
       points: 40,
@@ -600,10 +594,6 @@ const modulesData = [
     }
   }
 ];
-
-// --- UI Components ---
-// Header, Sidebar, Dashboard (updated to include LiveQuizGenerator), ModuleView, QuizView
-// QuizView needs significant updates to handle SAQs and the dynamic nature of questions better.
 
 function Header({ currentModuleTitle }) {
   const { user, appSignOut } = useContext(AuthContext);
@@ -783,10 +773,15 @@ function Dashboard({ modules, onSelectModule, userData }) {
   );
 }
 
-function ModuleView({ module, onGenerateLiveQuiz }) { // Added onGenerateLiveQuiz prop
+function ModuleView({ module, onGenerateLiveQuiz }) { 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [showQuiz, setShowQuiz] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false); // For static quizzes
   const { userData, markLessonCompleted } = useContext(UserDataContext);
+
+  useEffect(() => { // Reset when module changes
+    setCurrentLessonIndex(0);
+    setShowQuiz(false);
+  }, [module]);
 
   const currentLesson = module.lessons[currentLessonIndex];
 
@@ -797,11 +792,14 @@ function ModuleView({ module, onGenerateLiveQuiz }) { // Added onGenerateLiveQui
     if (currentLessonIndex < module.lessons.length - 1) {
       setCurrentLessonIndex(currentLessonIndex + 1);
     } else {
-      // If it's a live quiz, trigger generation via prop. Otherwise, show static quiz.
       if (module.quizType === 'live' && module.quizTopic) {
-          onGenerateLiveQuiz(module.quizTopic, module.id, module.title); // Pass module id and title
+          console.log("ModuleView: Triggering live quiz generation for topic:", module.quizTopic);
+          onGenerateLiveQuiz(module.quizTopic, module.id, module.title); 
+      } else if (module.quiz) { // Check if a static quiz exists
+          setShowQuiz(true); 
       } else {
-          setShowQuiz(true); // For static quizzes
+          console.log("ModuleView: No quiz defined for this module or not a live quiz type.");
+          // Optionally, navigate back to dashboard or show a "Module Complete" message
       }
     }
   };
@@ -815,8 +813,6 @@ function ModuleView({ module, onGenerateLiveQuiz }) { // Added onGenerateLiveQui
   
   const isLessonCompleted = userData?.completedLessons?.includes(currentLesson.id);
 
-  // If showQuiz is true AND it's a static quiz, render QuizView with module.quiz
-  // Live quizzes will be handled by the App component's state for liveModuleQuiz
   if (showQuiz && module.quiz && module.quizType !== 'live') {
     return <QuizView quiz={module.quiz} onBackToLessons={() => setShowQuiz(false)} moduleTitle={module.title} moduleId={module.id} />;
   }
@@ -845,7 +841,7 @@ function ModuleView({ module, onGenerateLiveQuiz }) { // Added onGenerateLiveQui
       <div className="flex justify-between items-center">
         <button
           onClick={handlePrevLesson}
-          disabled={currentLessonIndex === 0 && !showQuiz}
+          disabled={currentLessonIndex === 0 && !showQuiz} // showQuiz condition might be irrelevant now
           className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           <ChevronLeft size={20} className="mr-1" /> Previous
@@ -854,7 +850,7 @@ function ModuleView({ module, onGenerateLiveQuiz }) { // Added onGenerateLiveQui
           onClick={handleNextLesson}
           className="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center text-sm"
         >
-          {currentLessonIndex < module.lessons.length - 1 ? 'Next Lesson' : (module.quizType === 'live' ? 'Generate & Take Quiz' : 'Go to Quiz')} 
+          {currentLessonIndex < module.lessons.length - 1 ? 'Next Lesson' : (module.quizType === 'live' ? 'Generate & Take Quiz' : (module.quiz ? 'Go to Quiz' : 'Finish Module'))} 
           <ChevronRight size={20} className="ml-1" />
         </button>
       </div>
@@ -881,9 +877,9 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
 
   if (isGenerating) {
       return (
-          <div className="p-6 text-slate-300 flex flex-col items-center justify-center">
+          <div className="p-6 text-slate-300 flex flex-col items-center justify-center min-h-[calc(100vh-150px)]"> {/* Ensure it takes height */}
               <Loader2 className="animate-spin h-12 w-12 text-sky-400 mb-4" />
-              Generating your live quiz on "{moduleTitle || quiz?.title}"... Please wait.
+              Generating your live quiz on "{moduleTitle || quiz?.title || 'the selected topic'}"... Please wait.
           </div>
       );
   }
@@ -892,7 +888,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
 
   const handleAnswer = (questionId, answer) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }));
-    if (currentQuestion?.type === 'mcq' && currentQuestion.explanation) { // Use explanation as feedback for MCQ
+    if (currentQuestion?.type === 'mcq' && currentQuestion.explanation) { 
         setFeedback(prev => ({
             ...prev,
             [questionId]: answer === currentQuestion.correctAnswer ? `Correct! ${currentQuestion.explanation}` : `Incorrect. The correct answer is ${currentQuestion.correctAnswer}. ${currentQuestion.explanation}`
@@ -917,7 +913,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
                 questionText: currentQuestion?.text,
                 studentAnswer: answers[questionId],
                 feedbackHints: currentQuestion?.feedbackHints || 'Evaluate based on general IB Digital Society assessment criteria for understanding, application, and critical thinking.',
-                points: currentQuestion?.points || 10 // Default points for SAQ
+                points: currentQuestion?.points || 10 
             })
         });
         
@@ -942,13 +938,13 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
     let score = 0;
     quiz?.questions?.forEach(q => { 
       const questionKey = q.id || `q-${quiz.questions.indexOf(q)}`;
-      const questionPoints = q.points || (q.type === 'mcq' ? 10 : 20); // Default points if not specified
+      const questionPoints = q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0)); // Default points
 
       if (q.type === 'mcq') {
         if (answers[questionKey] === q.correctAnswer) {
           score += questionPoints; 
         }
-      } else if (q.type === 'shortAnswer') {
+      } else if (q.type === 'saq') { // Changed from 'shortAnswer' to 'saq' to match Netlify function prompt
         const questionFeedback = feedback[questionKey];
         if (questionFeedback && typeof questionFeedback === 'string') {
             const match = questionFeedback.match(/Suggested Mark: (\d+)\/(\d+)/);
@@ -968,21 +964,25 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
   const handleSubmitQuiz = () => {
     console.log("QuizView: handleSubmitQuiz called."); 
     const finalScore = calculateScore();
-    const totalPossibleScore = quiz?.questions?.reduce((sum, q) => sum + (q.points || (q.type === 'mcq' ? 10 : 20)), 0) || 0; 
+    const totalPossibleScore = quiz?.questions?.reduce((sum, q) => sum + (q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0))), 0) || 0; 
     
-    if (!isLiveQuiz && quiz.id && quiz.points) { 
+    // For predefined quizzes, `quiz.points` refers to the overall points for completing the *module quiz section*.
+    // For live quizzes, this specific `quiz.points` field won't exist on the generated quiz object.
+    if (!isLiveQuiz && quiz.id && modulesData.find(m => m.quiz?.id === quiz.id)?.quiz?.points) { 
+        const predefinedQuizOverallPoints = modulesData.find(m => m.quiz.id === quiz.id).quiz.points;
         const scoreDataToStore = { score: finalScore, total: totalPossibleScore };
-        // For predefined quizzes, original points value from moduleData.quiz.points is for completing the quiz itself
-        const pointsForCompletion = (module.quiz.points || 0) + finalScore; 
+        const pointsForCompletion = predefinedQuizOverallPoints + finalScore; 
         markQuizCompleted(quiz.id, scoreDataToStore, pointsForCompletion);
 
         if (totalPossibleScore > 0 && (finalScore / totalPossibleScore >= 0.8)) {
             addBadge(`${moduleTitle || quiz.title} Master`);
         }
         const completedQuizIds = userData?.completedQuizzes?.map(q => q.quizId) || [];
-        const allQuizzesNowDone = modulesData.every(m => completedQuizIds.includes(m.quiz?.id) || m.quiz?.id === quiz.id);
+        const allPredefinedQuizzes = modulesData.filter(m => m.quiz && m.quizType !== 'live');
+        const allPredefinedQuizzesDone = allPredefinedQuizzes.every(m => completedQuizIds.includes(m.quiz.id) || m.quiz.id === quiz.id);
 
-        if (allQuizzesNowDone && !userData?.badges?.includes("AI Workbook Champion")) {
+
+        if (allPredefinedQuizzesDone && !userData?.badges?.includes("AI Workbook Champion")) {
             addBadge("AI Workbook Champion");
         }
     }
@@ -1000,19 +1000,86 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
   const isPredefinedQuizCompleted = !isLiveQuiz && userData?.completedQuizzes?.find(q => q.quizId === quiz.id);
 
   if (showResults) {
-    // ... (showResults JSX, same as before, ensure it uses quiz?.title, quiz?.questions etc.)
+    const finalScoreData = {score: calculateScore(), total: quiz?.questions?.reduce((sum, q) => sum + (q.points || (q.type === 'mcq' ? 10 : (q.type === 'saq' ? 20 : 0))), 0) || 0};
+    console.log("QuizView: Showing results.", finalScoreData); 
+    const predefinedQuizInfo = !isLiveQuiz && modulesData.find(m => m.quiz?.id === quiz.id);
+    const predefinedQuizOverallPoints = predefinedQuizInfo?.quiz?.points || 0;
+
+    return (
+      <div className="p-4 md:p-6 bg-slate-700 rounded-xl shadow-lg text-center">
+        <h3 className="text-2xl md:text-3xl font-bold text-sky-400 mb-4">Quiz Results: {quiz?.title}</h3>
+        <Award size={48} md:size={64} className="mx-auto text-yellow-400 mb-4" />
+        <p className="text-xl md:text-2xl text-white mb-2">
+          Your Score: <span className="font-bold text-green-400">{finalScoreData.score}</span> / {finalScoreData.total}
+        </p>
+        {!isLiveQuiz && predefinedQuizOverallPoints > 0 && <p className="text-slate-300 mb-6 text-sm">You've earned {predefinedQuizOverallPoints + finalScoreData.score} total points for this module quiz attempt!</p>}
+        {isLiveQuiz && <p className="text-slate-300 mb-6 text-sm">You've completed the live quiz!</p>}
+        
+        <h4 className="text-lg md:text-xl font-semibold text-sky-300 mt-6 mb-3">Detailed Feedback:</h4>
+        <div className="space-y-4 text-left max-h-80 md:max-h-96 overflow-y-auto p-3 md:p-4 bg-slate-600 rounded-lg">
+            {quiz?.questions?.map((q, idx) => {
+                const questionKey = q.id || `q-${idx}`;
+                return (
+                    <div key={questionKey} className="p-3 bg-slate-500 rounded">
+                        <p className="font-semibold text-sky-200 text-sm md:text-base">{q.text}</p>
+                        <p className="text-xs md:text-sm text-slate-300">Your answer: {answers[questionKey] || "Not answered"}</p>
+                        {q.type === 'mcq' && feedback[questionKey] && <p className={`text-xs md:text-sm ${answers[questionKey] === q.correctAnswer ? 'text-green-300' : 'text-red-300'}`}>{feedback[questionKey]}</p>}
+                        {q.type === 'saq' && feedback[questionKey] && (
+                            <div className="mt-2 p-2 bg-slate-400 rounded text-slate-800 text-xs md:text-sm whitespace-pre-wrap">
+                                <strong className="text-slate-900">AI Feedback:</strong><br/> {feedback[questionKey]}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+
+        <button
+          onClick={onBackToLessons} 
+          className="mt-8 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg text-sm"
+        >
+          {isLiveQuiz ? (moduleId ? 'Back to Module Lessons' : 'Back to Quiz Generator') : 'Back to Lessons'}
+        </button>
+      </div>
+    );
   }
   
   if (!isLiveQuiz && isPredefinedQuizCompleted && !showResults) { 
-    // ... (logic for already completed predefined quiz, same as before)
+    const completedQuizData = userData.completedQuizzes.find(q => q.quizId === quiz.id);
+    return (
+        <div className="p-4 md:p-6 bg-slate-700 rounded-xl shadow-lg text-center">
+            <CheckCircle size={48} md:size={64} className="mx-auto text-green-400 mb-4" />
+            <h3 className="text-2xl md:text-3xl font-bold text-sky-400 mb-4">Quiz Already Completed!</h3>
+            {completedQuizData.score &&
+                <p className="text-xl md:text-2xl text-white mb-2">
+                Your Score for {quiz?.title}: <span className="font-bold text-green-400">{completedQuizData.score.score}</span> / {completedQuizData.score.total}
+                </p>
+            }
+            <p className="text-slate-300 mb-6 text-sm">You can review your stored results or go back to lessons.</p>
+            <button
+              onClick={() => {
+                  setShowResults(true); 
+              }}
+              className="mt-4 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg mr-2 text-sm"
+            >
+              View Stored Results
+            </button>
+            <button
+              onClick={onBackToLessons}
+              className="mt-4 bg-slate-500 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg text-sm"
+            >
+              Back to Lessons
+            </button>
+        </div>
+    );
   }
 
   if (!currentQuestion) { 
     console.log("QuizView: No currentQuestion, rendering loading/empty state for quiz:", quiz?.title); 
     return (
-        <div className="p-6 text-slate-400 flex flex-col items-center justify-center">
+        <div className="p-6 text-slate-400 flex flex-col items-center justify-center min-h-[calc(100vh-150px)]">
             <Loader2 className="animate-spin h-10 w-10 text-sky-400 mb-3" />
-            {isLiveQuiz ? `Generating your live quiz on "${quiz?.title || moduleTitle}"...` : "Loading quiz questions..."}
+            {isLiveQuiz ? `Generating your live quiz on "${quiz?.title || moduleTitle || 'the selected topic'}"...` : "Loading quiz questions..."}
             {quiz?.questions && quiz.questions.length === 0 && " No questions found for this quiz."}
         </div>
     );
@@ -1042,7 +1109,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
             ))}
           </div>
         )}
-        {currentQuestion.type === 'saq' && (
+        {currentQuestion.type === 'saq' && ( // Changed from 'shortAnswer'
           <div>
             <textarea
               value={answers[questionKey] || ''}
@@ -1078,7 +1145,7 @@ function QuizView({ quiz, onBackToLessons, moduleTitle, moduleId, isLiveQuiz = f
           onClick={onBackToLessons}
           className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm"
         >
-          {isLiveQuiz ? 'Back to Quiz Generator' : 'Back to Lessons'} 
+          {isLiveQuiz ? (moduleId ? 'Back to Module Lessons' : 'Back to Quiz Generator') : 'Back to Lessons'} 
         </button>
         <button
           onClick={handleNextQuestion}
@@ -1103,20 +1170,21 @@ function App() {
 
   const [liveModuleQuiz, setLiveModuleQuiz] = useState(null);
   const [isGeneratingModuleQuiz, setIsGeneratingModuleQuiz] = useState(false);
-  const [currentLiveQuizModuleInfo, setCurrentLiveQuizModuleInfo] = useState(null); // To store { id, title }
+  const [currentLiveQuizModuleInfo, setCurrentLiveQuizModuleInfo] = useState(null); 
 
 
   const handleGenerateLiveModuleQuiz = async (topic, moduleId, moduleTitle) => {
     console.log("App: handleGenerateLiveModuleQuiz called for topic:", topic, "Module ID:", moduleId);
     setIsGeneratingModuleQuiz(true);
-    setLiveModuleQuiz(null); // Clear previous live quiz
-    setCurrentLiveQuizModuleInfo({ id: moduleId, title: moduleTitle }); // Store current module info for QuizView title
+    setLiveModuleQuiz(null); 
+    setCurrentLiveQuizModuleInfo({ id: moduleId, title: moduleTitle }); 
+    setSelectedModule(null); // Deselect module to show quiz view directly
 
     try {
         const response = await fetch('/.netlify/functions/generate-quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ topic: topic, numMCQs: 2, numSAQs: 1 }), // Example: 2 MCQs, 1 SAQ
+            body: JSON.stringify({ topic: topic, numMCQs: 2, numSAQs: 1 }), 
         });
         if (!response.ok) {
             const errData = await response.json();
@@ -1128,14 +1196,13 @@ function App() {
                 ...q,
                 id: q.id || `live-mod-q-${moduleId}-${index}`
             }));
-            setLiveModuleQuiz({ ...data.quiz, questions: questionsWithIds, title: `Quiz: ${moduleTitle}` }); // Use moduleTitle for quiz
+            setLiveModuleQuiz({ ...data.quiz, questions: questionsWithIds, title: `Quiz: ${moduleTitle}` }); 
         } else {
             throw new Error('Generated module quiz data is not in expected format or empty.');
         }
     } catch (error) {
         console.error("Error generating live module quiz:", error);
-        // Handle error display if needed, e.g., set an error state
-        setLiveModuleQuiz({ title: `Error generating quiz for ${moduleTitle}`, questions: [] }); // Show an error state in QuizView
+        setLiveModuleQuiz({ title: `Error generating quiz for ${moduleTitle}`, questions: [] }); 
     } finally {
         setIsGeneratingModuleQuiz(false);
     }
@@ -1152,13 +1219,11 @@ function App() {
      return <AuthForm />; 
   }
 
-  // Show loading for user data *after* user is confirmed and auth is not loading
   if (userDataLoading && user) { 
     console.log("App: User exists, but in userDataLoading state..."); 
     return <div className="flex justify-center items-center h-screen bg-slate-900 text-white"><Sparkles className="animate-spin h-8 w-8 mr-2" />Loading Your Workbook Data...</div>;
   }
   
-  // This specific error check might be redundant if !user already routes to AuthForm
   if (authError && !user) { 
       console.log("App: Auth error exists and no user, showing AuthForm.");
       return <AuthForm />;
@@ -1169,10 +1234,15 @@ function App() {
       return (
         <div className="flex flex-col h-screen bg-slate-900 text-white font-sans overflow-hidden">
           <Header currentModuleTitle={currentLiveQuizModuleInfo?.title || "Live Quiz"} />
+          <div className="md:hidden p-2 bg-slate-800 fixed top-[72px] left-0 z-50 shadow-md"> 
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-slate-300 hover:text-white">
+                {isSidebarOpen ? <X size={28}/> : <Menu size={28}/>}
+            </button>
+          </div>
           <div className="flex flex-1 pt-12 md:pt-0 overflow-hidden">
             <Sidebar 
                 modules={modulesData} 
-                selectedModule={selectedModule} // Could be null or the module that triggered this
+                selectedModule={modulesData.find(m => m.id === currentLiveQuizModuleInfo?.id)} 
                 onSelectModule={(mod) => { setSelectedModule(mod); setLiveModuleQuiz(null); setIsGeneratingModuleQuiz(false); }}
                 onShowDashboard={() => { setSelectedModule(null); setLiveModuleQuiz(null); setIsGeneratingModuleQuiz(false); }}
                 isOpen={isSidebarOpen}
@@ -1180,17 +1250,15 @@ function App() {
             />
             <main className="flex-1 p-0 overflow-y-auto bg-slate-900">
                 <QuizView 
-                    quiz={liveModuleQuiz} // This will be the dynamically generated quiz
+                    quiz={liveModuleQuiz} 
                     onBackToLessons={() => {
                         setLiveModuleQuiz(null);
                         setIsGeneratingModuleQuiz(false);
-                        // Optionally, re-select the module to show its lessons, or go to dashboard
-                        // For now, just clears the live quiz view
                         setSelectedModule(modulesData.find(m => m.id === currentLiveQuizModuleInfo?.id) || null); 
                     }}
-                    moduleTitle={currentLiveQuizModuleInfo?.title} // Pass the original module title
+                    moduleTitle={currentLiveQuizModuleInfo?.title} 
                     moduleId={currentLiveQuizModuleInfo?.id}
-                    isLiveQuiz={true} // Indicate it's a live quiz (for scoring/completion logic)
+                    isLiveQuiz={true} 
                     isGenerating={isGeneratingModuleQuiz}
                 />
             </main>
@@ -1223,7 +1291,7 @@ function App() {
             {selectedModule ? (
               <ModuleView 
                 module={selectedModule} 
-                onGenerateLiveQuiz={handleGenerateLiveModuleQuiz} // Pass the handler function
+                onGenerateLiveQuiz={handleGenerateLiveModuleQuiz} 
               />
             ) : (
               <Dashboard modules={modulesData} onSelectModule={setSelectedModule} userData={userData} />
@@ -1259,5 +1327,6 @@ export default function WrappedApp() {
     </AuthProvider>
   );
 }
+
 
 
