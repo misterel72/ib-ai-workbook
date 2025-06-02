@@ -1505,8 +1505,3 @@ export default function WrappedApp() {
     </AuthProvider>
   );
 }
-
-
-
-
-
