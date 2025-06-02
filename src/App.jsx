@@ -1,4 +1,4 @@
-      import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 // Firebase imports:
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
@@ -22,7 +22,7 @@ import {
 } from 'firebase/firestore';
 import { 
     ChevronLeft, ChevronRight, BookOpen, CheckCircle, Award, Brain, 
-    Users, Lightbulb, MessageSquare, LogOut, UserCircle, Sparkles, Mail, KeyRound, UserPlus, Menu, X, Wand2, Loader2, Bot // Added Bot
+    Users, Lightbulb, MessageSquare, LogOut, UserCircle, Sparkles, Mail, KeyRound, UserPlus, Menu, X, Wand2, Loader2, Bot, AlertTriangle, MessageCircleQuestion, SendHorizonal
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -605,7 +605,7 @@ function LiveQuizGenerator() {
     );
 }
 
-// --- CORRECTED modulesData with Robotics Module ---
+// --- UPDATED modulesData with Robotics Module and removed ML ---
 const modulesData = [
   {
     id: 'intro-ai',
@@ -646,7 +646,7 @@ const modulesData = [
     id: 'robotics-autonomy',
     title: '3.7 Robotics and Autonomous Technologies',
     description: 'Investigate different types of robots and autonomous technologies, their uses, and the dilemmas these developments have brought about.',
-    icon: Bot, // Using Bot icon from lucide-react
+    icon: Bot, 
     lessons: [
         {
             id: 'robotics-lesson-1',
@@ -654,8 +654,8 @@ const modulesData = [
             type: 'theory',
             points: 10,
             content: `
-                <p>Robots and autonomous technologies demonstrate a capacity to sense, think and/or act with some degree of independence[cite: 1]. They have evolved over time and are increasingly ubiquitous, pervasive and woven into the everyday lives of people and communities[cite: 1]. This integration introduces significant opportunities and dilemmas in digital society[cite: 1].</p>
-                <p>The word "robot" was first introduced in a science fiction play in 1921 and is now a reality[cite: 2]. Robots have transformed manufacturing by increasing efficiency, safety and accuracy, often at the cost of replacing jobs[cite: 3]. Current development focuses on service and social robots aimed at working alongside humans[cite: 4].</p>
+                <p>Robots and autonomous technologies demonstrate a capacity to sense, think and/or act with some degree of independence. They have evolved over time and are increasingly ubiquitous, pervasive and woven into the everyday lives of people and communities. This integration introduces significant opportunities and dilemmas in digital society.</p>
+                <p>The word "robot" was first introduced in a science fiction play in 1921 and is now a reality. Robots have transformed manufacturing by increasing efficiency, safety and accuracy, often at the cost of replacing jobs. Current development focuses on service and social robots aimed at working alongside humans.</p>
             `
         },
         {
@@ -664,21 +664,21 @@ const modulesData = [
             type: 'theory',
             points: 15,
             content: `
-                <p>A robot is essentially a programmable machine that can complete a set task with little or no human intervention[cite: 7, 17]. Robots have evolved in two distinct categories: those for manufacturing and those for human interaction[cite: 10].</p>
+                <p>A robot is essentially a programmable machine that can complete a set task with little or no human intervention. Robots have evolved in two distinct categories: those for manufacturing and those for human interaction.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Industrial Robots</h4>
-                <p>Demand for robots in manufacturing has been a driving force since the 1960s[cite: 12]. They perform tasks like drilling, painting, welding, assembly, and material handling[cite: 13]. These robots have replaced many human workers but differ from service robots, which often assist workers or customers in fields like agriculture or construction[cite: 14, 15]. Example: Great Wall Motors increased automation in 2014 with collaborating robots for panel positioning and welding[cite: 18, 19]. Foxconn planned to replace 60,000 jobs with automation by 2020[cite: 20].</p>
+                <p>Demand for robots in manufacturing has been a driving force since the 1960s. They perform tasks like drilling, painting, welding, assembly, and material handling. These robots have replaced many human workers but differ from service robots, which often assist workers or customers in fields like agriculture or construction. Example: Great Wall Motors increased automation in 2014 with collaborating robots for panel positioning and welding. Foxconn planned to replace 60,000 jobs with automation by 2020.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Service Robots</h4>
-                <p>Service robots assist humans with undesirable tasks—dull, dirty, or dangerous jobs[cite: 21, 26]. They can be for domestic (e.g., robot vacuums[cite: 25], pool cleaners, lawnmowers, robotized wheelchairs [cite: 23]) or professional/commercial use (e.g., cleaning public places, deliveries, surgery assistance [cite: 33, 34]). They can work efficiently, accurately, and with little downtime[cite: 38]. Example: Flippy 2, a grill chef robot, handles unpleasant, repetitive cooking tasks in fast-food chains[cite: 39, 40, 41].</p>
+                <p>Service robots assist humans with undesirable tasks—dull, dirty, or dangerous jobs. They can be for domestic (e.g., robot vacuums, pool cleaners, lawnmowers, robotized wheelchairs) or professional/commercial use (e.g., cleaning public places, deliveries, surgery assistance). They can work efficiently, accurately, and with little downtime. Example: Flippy 2, a grill chef robot, handles unpleasant, repetitive cooking tasks in fast-food chains.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Virtual Personal Assistants</h4>
-                <p>These are voice-controlled helpers like Google Home or Amazon Echo, found in smart speakers or phones[cite: 28, 43]. They perform tasks like weather updates, setting timers, or reading news via voice commands[cite: 29]. Example: Hampshire County Council trialled virtual assistants to support elderly and disabled people with tasks like controlling smart home devices[cite: 30, 31].</p>
+                <p>These are voice-controlled helpers like Google Home or Amazon Echo, found in smart speakers or phones. They perform tasks like weather updates, setting timers, or reading news via voice commands. Example: Hampshire County Council trialled virtual assistants to support elderly and disabled people with tasks like controlling smart home devices.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Social Robots</h4>
-                <p>Unlike service robots, social robots are designed to interact and communicate with humans acceptably[cite: 44, 45]. They are used in customer service or as home companions for the elderly[cite: 46]. Limitations include a potential lack of empathy and inappropriate responses to unknown situations[cite: 47]. Example: Jibo, a home social robot, provided companionship and voice assistance using facial/voice recognition[cite: 49, 50]. Aerobot at Istanbul Airport communicates in over 20 languages and guides passengers[cite: 55, 56, 57].</p>
+                <p>Unlike service robots, social robots are designed to interact and communicate with humans acceptably. They are used in customer service or as home companions for the elderly. Limitations include a potential lack of empathy and inappropriate responses to unknown situations. Example: Jibo, a home social robot, provided companionship and voice assistance using facial/voice recognition. Aerobot at Istanbul Airport communicates in over 20 languages and guides passengers.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Internet of Things (IoT) in Industry</h4>
-                <p>Businesses use sensors on components to collect data for improving production lines or services[cite: 65]. Benefits are similar to home IoT but on a larger scale[cite: 66]. Uses include predictive maintenance (sensors alert when a machine needs maintenance [cite: 67]), energy optimization[cite: 68], location tracking (GPS, RFID for stock/equipment [cite: 69]), remote quality monitoring (e.g., water/air quality [cite: 70, 71]), and workplace analytics[cite: 72].</p>
+                <p>Businesses use sensors on components to collect data for improving production lines or services. Benefits are similar to home IoT but on a larger scale. Uses include predictive maintenance (sensors alert when a machine needs maintenance), energy optimization, location tracking (GPS, RFID for stock/equipment), remote quality monitoring (e.g., water/air quality), and workplace analytics.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Autonomous Vehicles (AVs)</h4>
-                <p>AVs can operate without human intervention[cite: 77, 96]. SAE defines levels of autonomy (0-5)[cite: 79]. Levels 0-2 augment the driver (e.g., adaptive cruise control[cite: 83], lane assist[cite: 83], self-parking like Mercedes PARKTRONIC [cite: 86, 87]). Level 3 allows self-driving under certain conditions (e.g., traffic jams [cite: 88, 89]). Levels 4 & 5 do not require a driver and may lack steering wheels/pedals[cite: 90, 91]. Level 4 examples include driverless taxis (like Singapore's 2016 trial [cite: 97, 98]) but operate under specific conditions (e.g., weather [cite: 93, 94]). Level 5 (full automation, no restrictions) is not yet achieved[cite: 101]. Benefits include fewer accidents and reduced congestion[cite: 102]. Challenges include sensor reliability in bad weather/graffiti[cite: 104], standards for AI training[cite: 107], ensuring safety as deep learning evolves[cite: 109], developing regulations[cite: 110], and gaining social acceptability after accidents[cite: 112, 113].</p>
+                <p>AVs can operate without human intervention. SAE defines levels of autonomy (0-5). Levels 0-2 augment the driver (e.g., adaptive cruise control, lane assist, self-parking like Mercedes PARKTRONIC). Level 3 allows self-driving under certain conditions (e.g., traffic jams). Levels 4 & 5 do not require a driver and may lack steering wheels/pedals. Level 4 examples include driverless taxis (like Singapore's 2016 trial) but operate under specific conditions (e.g., weather). Level 5 (full automation, no restrictions) is not yet achieved. Benefits include fewer accidents and reduced congestion. Challenges include sensor reliability in bad weather/graffiti, standards for AI training, ensuring safety as deep learning evolves, developing regulations, and gaining social acceptability after accidents.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Drones (UAVs)</h4>
-                <p>Drones are flying robots, remote-controlled or autonomous[cite: 135, 137]. Formerly military (practice, data gathering, attacks [cite: 135]), they now have commercial/private uses (delivery, surveillance, search/rescue, video [cite: 136]). They need to be lightweight with propellers and power for flight; GPS and sensors for navigation and data collection[cite: 138, 139, 140]. Example: Zipline in Ghana uses drones for medical supply delivery[cite: 142].</p>
+                <p>Drones are flying robots, remote-controlled or autonomous. Formerly military (practice, data gathering, attacks), they now have commercial/private uses (delivery, surveillance, search/rescue, video). They need to be lightweight with propellers and power for flight; GPS and sensors for navigation and data collection. Example: Zipline in Ghana uses drones for medical supply delivery.</p>
             `
         },
         {
@@ -687,21 +687,21 @@ const modulesData = [
             type: 'theory',
             points: 15,
             content: `
-                <p>Robots demonstrate a capacity to sense, think, and act with some degree of independence[cite: 1]. Key characteristics include:</p>
+                <p>Robots demonstrate a capacity to sense, think, and act with some degree of independence. Key characteristics include:</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Sensory Inputs for Awareness</h4>
                 <p>Robots perceive their environment similarly to human senses:</p>
                 <ul class="list-disc list-inside space-y-1">
-                    <li><strong>Vision:</strong> Digital cameras (stereo vision for depth perception [cite: 148]), light sensors (day/night detection [cite: 150]), infrared/ultrasound sensors (object distance [cite: 151, 152]), GPS (location [cite: 153]). Advanced AVs use lidar (shape/contour of ground [cite: 156]), sonar (water depth [cite: 157]), and radar (moving objects, environment shape [cite: 154, 155, 158]).</li>
-                    <li><strong>Hearing:</strong> Microphones collect sound, used with voice recognition to understand speech[cite: 159, 160].</li>
-                    <li><strong>Smell and Taste:</strong> Chemical sensors collect data for pattern recognition to identify smells or tastes (e.g., pH sensor for food [cite: 161, 162, 163]).</li>
-                    <li><strong>Touch:</strong> Pressure sensors or resistive/capacitive touch sensors determine grip strength or detect objects/human touch[cite: 164]. Temperature sensors allow reactions to specific temperatures (e.g., firefighting robots [cite: 165, 166]).</li>
+                    <li><strong>Vision:</strong> Digital cameras (stereo vision for depth perception), light sensors (day/night detection), infrared/ultrasound sensors (object distance), GPS (location). Advanced AVs use lidar (shape/contour of ground), sonar (water depth), and radar (moving objects, environment shape).</li>
+                    <li><strong>Hearing:</strong> Microphones collect sound, used with voice recognition to understand speech.</li>
+                    <li><strong>Smell and Taste:</strong> Chemical sensors collect data for pattern recognition to identify smells or tastes (e.g., pH sensor for food).</li>
+                    <li><strong>Touch:</strong> Pressure sensors or resistive/capacitive touch sensors determine grip strength or detect objects/human touch. Temperature sensors allow reactions to specific temperatures (e.g., firefighting robots).</li>
                 </ul>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Logical Reasoning with Inputs</h4>
-                <p>A robot's control system processes sensor data for decision-making, sending commands to actuators[cite: 167]. Basic AI allows problem-solving in limited domains (e.g., inspection robots comparing data to stored values [cite: 168, 169, 170]). More recent robots use machine learning to learn and adapt[cite: 171, 173]. Supervised learning can be used for part selection on production lines[cite: 175]. Reinforcement learning helps AVs adapt[cite: 176]. Deep learning enhances machine vision for better accuracy[cite: 177, 178].</p>
+                <p>A robot's control system processes sensor data for decision-making, sending commands to actuators. Basic AI allows problem-solving in limited domains (e.g., inspection robots comparing data to stored values). More recent robots use machine learning to learn and adapt. Supervised learning can be used for part selection on production lines. Reinforcement learning helps AVs adapt. Deep learning enhances machine vision for better accuracy.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Ability to Interact and Move</h4>
-                <p>Most robots have moving parts using actuators (electric motors, hydraulic/pneumatic systems [cite: 180, 181, 200]) powered by batteries or main electricity[cite: 182]. End effectors (peripheral devices [cite: 201]) are attached to actuators[cite: 183, 184], including grippers (for manipulating objects [cite: 185, 186]), process tools (welding, painting [cite: 187]), and sensors (for inspections [cite: 188]).</p>
+                <p>Most robots have moving parts using actuators (electric motors, hydraulic/pneumatic systems) powered by batteries or main electricity. End effectors (peripheral devices) are attached to actuators, including grippers (for manipulating objects), process tools (welding, painting), and sensors (for inspections).</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Degree of Autonomy</h4>
-                <p>The level of autonomy defines independence from a controller[cite: 189]. Semi-autonomous robots have some intelligence and can react to certain conditions (e.g., a basic robot vacuum avoiding obstacles [cite: 190, 191, 192, 193]). Fully autonomous robots operate independently on more complex tasks, though often restricted to specific environments, but will become more adaptable with technological advances[cite: 194, 195].</p>
+                <p>The level of autonomy defines independence from a controller. Semi-autonomous robots have some intelligence and can react to certain conditions (e.g., a basic robot vacuum avoiding obstacles). Fully autonomous robots operate independently on more complex tasks, though often restricted to specific environments, but will become more adaptable with technological advances.</p>
             `
         },
         {
@@ -710,31 +710,31 @@ const modulesData = [
             type: 'evolution',
             points: 10,
             content: `
-                <p>The history of robots is linked to science, technology, and AI[cite: 207]. Early concepts include Egyptian water clocks (1500s BC) and Archytas's steam-powered bird (c. 400 BC)[cite: 209]. In 1948, William Grey Walter created Elmer and Elsie, tortoise-like robots that could find their charging station[cite: 210, 211, 212]. 'Shakey' (1958) could observe, move in unfamiliar areas, and make simple responses[cite: 213, 214, 215].</p>
+                <p>The history of robots is linked to science, technology, and AI. Early concepts include Egyptian water clocks (1500s BC) and Archytas's steam-powered bird (c. 400 BC). In 1948, William Grey Walter created Elmer and Elsie, tortoise-like robots that could find their charging station. 'Shakey' (1958) could observe, move in unfamiliar areas, and make simple responses.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Robots in Science Fiction and Asimov's Laws</h4>
-                <p>Karel Capek introduced "robot" in his 1921 play "Rossum's Universal Robots"[cite: 217, 218]. Isaac Asimov's Three Laws of Robotics (1941) are: 1. Must not injure humans. 2. Must obey humans (unless conflicting with Law 1). 3. Must protect its own existence (unless conflicting with Laws 1 or 2)[cite: 219, 220]. A "Zeroth Law" was added later: A robot may not injure humanity or allow humanity to come to harm, unless this violates a higher order law[cite: 221, 222].</p>
+                <p>Karel Capek introduced "robot" in his 1921 play "Rossum's Universal Robots". Isaac Asimov's Three Laws of Robotics (1941) are: 1. Must not injure humans. 2. Must obey humans (unless conflicting with Law 1). 3. Must protect its own existence (unless conflicting with Laws 1 or 2). A "Zeroth Law" was added later: A robot may not injure humanity or allow humanity to come to harm, unless this violates a higher order law.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Industrial and Manufacturing Robots Timeline</h4>
                 <ul class="list-disc list-inside space-y-1">
-                    <li><strong>1954-61:</strong> Unimate (USA), first programmable industrial robot for General Motors (diecasting, welding)[cite: 228, 229].</li>
-                    <li><strong>1974:</strong> IRB-6 (Sweden), first electric microcomputer-controlled industrial robot (welding, polishing)[cite: 224, 225].</li>
-                    <li><strong>1981 (Consight):</strong> General Motors used visual sensors with robots to select auto parts[cite: 230].</li>
-                    <li><strong>1981 (SCARA):</strong> Japan developed a dexterous robotic arm for loading/unloading[cite: 226].</li>
-                    <li><strong>1994:</strong> Motorman MRC (USA) supported up to 21 axes and synchronized robots[cite: 231].</li>
-                    <li><strong>2008:</strong> Universal Robots UR5 (Denmark), first collaborative robot (cobot)[cite: 227].</li>
+                    <li><strong>1954-61:</strong> Unimate (USA), first programmable industrial robot for General Motors (diecasting, welding).</li>
+                    <li><strong>1974:</strong> IRB-6 (Sweden), first electric microcomputer-controlled industrial robot (welding, polishing).</li>
+                    <li><strong>1981 (Consight):</strong> General Motors used visual sensors with robots to select auto parts.</li>
+                    <li><strong>1981 (SCARA):</strong> Japan developed a dexterous robotic arm for loading/unloading.</li>
+                    <li><strong>1994:</strong> Motorman MRC (USA) supported up to 21 axes and synchronized robots.</li>
+                    <li><strong>2008:</strong> Universal Robots UR5 (Denmark), first collaborative robot (cobot).</li>
                 </ul>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Humanoid and Interactive Robots Timeline</h4>
                 <ul class="list-disc list-inside space-y-1">
-                    <li><strong>1973:</strong> Wabot-1 (Japan), first humanoid with machine intelligence (walk, grip, see, communicate)[cite: 234, 235].</li>
-                    <li><strong>1986 (ASIMO):</strong> Honda's robot could run, climb, kick, sing, respond to voice[cite: 236]. (Note: ASIMO first public demo was 2000, development started 1986).</li>
-                    <li><strong>1998:</strong> AIBO (Sony, Japan), robot pet dog with lifelike movement and sensors[cite: 237].</li>
-                    <li><strong>2004:</strong> PARO (Japan), therapeutic robotic baby seal for stress reduction[cite: 238].</li>
-                    <li><strong>2013:</strong> Baxter (Rethink Robotics, Germany), first humanoid industrial robot for general use[cite: 239].</li>
-                    <li><strong>2015:</strong> Robear (Japan), giant bear robot hospital aid[cite: 240].</li>
-                    <li><strong>2018:</strong> Pepper (Softbank, Japan), child-size robot that can dance, joke, navigate[cite: 241].</li>
-                    <li><strong>2021:</strong> Astro (Amazon, USA), "Alexa on Wheels" home assistant combining robotics, AI, monitoring, cloud[cite: 242].</li>
+                    <li><strong>1973:</strong> Wabot-1 (Japan), first humanoid with machine intelligence (walk, grip, see, communicate).</li>
+                    <li><strong>1986 (ASIMO):</strong> Honda's robot could run, climb, kick, sing, respond to voice. (Note: ASIMO first public demo was 2000, development started 1986).</li>
+                    <li><strong>1998:</strong> AIBO (Sony, Japan), robot pet dog with lifelike movement and sensors.</li>
+                    <li><strong>2004:</strong> PARO (Japan), therapeutic robotic baby seal for stress reduction.</li>
+                    <li><strong>2013:</strong> Baxter (Rethink Robotics, Germany), first humanoid industrial robot for general use.</li>
+                    <li><strong>2015:</strong> Robear (Japan), giant bear robot hospital aid.</li>
+                    <li><strong>2018:</strong> Pepper (Softbank, Japan), child-size robot that can dance, joke, navigate.</li>
+                    <li><strong>2021:</strong> Astro (Amazon, USA), "Alexa on Wheels" home assistant combining robotics, AI, monitoring, cloud.</li>
                 </ul>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Machine Consciousness and Cognitive Robotics</h4>
-                <p>Early interactive robots likely did not have consciousness[cite: 247]. Machine consciousness requires strong AI[cite: 248]. Cognitive robotics aims to design robots with human-like intelligence that can perceive, plan, deal with uncertainty, and learn continuously[cite: 249, 250, 251]. Example: Sophia (2016) had human-like features, imitated gestures, answered questions, and was designed to learn. Granted citizenship by Saudi Arabia, raising questions about robot rights[cite: 252, 253, 254, 255, 256, 257].</p>
+                <p>Early interactive robots likely did not have consciousness. Machine consciousness requires strong AI. Cognitive robotics aims to design robots with human-like intelligence that can perceive, plan, deal with uncertainty, and learn continuously. Example: Sophia (2016) had human-like features, imitated gestures, answered questions, and was designed to learn. Granted citizenship by Saudi Arabia, raising questions about robot rights.</p>
             `
         },
         {
@@ -743,35 +743,35 @@ const modulesData = [
             type: 'dilemmas',
             points: 20,
             content: `
-                <p>Advancements in robotics bring benefits like aiding people with disabilities and increasing manufacturing efficiency, but also challenges and unintended consequences[cite: 274, 275].</p>
+                <p>Advancements in robotics bring benefits like aiding people with disabilities and increasing manufacturing efficiency, but also challenges and unintended consequences.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Anthropomorphism and the Uncanny Valley</h4>
-                <p>Anthropomorphism is attributing human characteristics to non-human entities like robots[cite: 277, 279]. The "uncanny valley," a concept by Masahiro Mori (1970), describes the eerie feeling people get when robots are very human-like but not perfectly so[cite: 280, 281, 282, 284, 540]. Robots become more appealing as they become more human-like up to a point, after which there's unease[cite: 282, 283]. This is a dilemma for designers: more lifelike robots can be better in some situations (e.g., with autistic children, training) but too lifelike can reduce societal acceptance[cite: 285, 286, 287].</p>
+                <p>Anthropomorphism is attributing human characteristics to non-human entities like robots. The "uncanny valley," a concept by Masahiro Mori (1970), describes the eerie feeling people get when robots are very human-like but not perfectly so. Robots become more appealing as they become more human-like up to a point, after which there's unease. This is a dilemma for designers: more lifelike robots can be better in some situations (e.g., with autistic children, training) but too lifelike can reduce societal acceptance.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Complexity of Human and Environmental Interactions</h4>
-                <p>Developing robots to work alongside unpredictable humans in changing environments is challenging[cite: 291, 292]. Cobots (collaborative robots [cite: 541]) need to understand human emotions, language, and behavior[cite: 293, 294]. The goal may be to develop robots that elicit emotional attachment from humans, rather than emotional robots themselves [cite: 296] (e.g., Kismet by Cynthia Breazeal in the 1990s provoked emotional reactions in humans [cite: 297, 298]). Mimicking human mobility across different terrains is also difficult[cite: 300]. Machine learning and robot vision help navigate obstacles[cite: 301], but robots struggle with unprepared situations (e.g., a fallen tree) and need to relearn/adapt[cite: 302, 303, 304]. This has led to accidents with autonomous vehicles, like the 2018 fatality in Tempe, Arizona[cite: 305, 306, 307].</p>
+                <p>Developing robots to work alongside unpredictable humans in changing environments is challenging. Cobots (collaborative robots) need to understand human emotions, language, and behavior. The goal may be to develop robots that elicit emotional attachment from humans, rather than emotional robots themselves (e.g., Kismet by Cynthia Breazeal in the 1990s provoked emotional reactions in humans). Mimicking human mobility across different terrains is also difficult. Machine learning and robot vision help navigate obstacles, but robots struggle with unprepared situations (e.g., a fallen tree) and need to relearn/adapt. This has led to accidents with autonomous vehicles, like the 2018 fatality in Tempe, Arizona.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Uneven and Underdeveloped Laws, Regulations, and Governance</h4>
-                <p>Minimizing privacy and security risks is a challenge[cite: 311]. Data used to train robots could be misused, or robots could be hacked[cite: 312]. Data ownership is also a question (end-user, manufacturer, or developer?)[cite: 314]. Asimov's Laws are guiding principles but may need adaptation for varied modern robots [cite: 316, 317, 318, 319, 320, 321] (e.g., military robots potentially violating Law 1 [cite: 322]). Laws may need to differ by context (drones vs. manufacturing robots [cite: 323, 324]). Professor Frank Pasquale proposed additional principles: AI should complement, not replace professionals; not counterfeit humanity; not intensify arms races; and systems must indicate their creator/controller/owner[cite: 325, 326, 327, 328, 329, 330]. Governments are working on legislation: South Korea's Robot Ethics Charter (2007)[cite: 332, 333], UK's ethical design standards (2016)[cite: 334, 335], EU's RoboLaw project (concluded 2014)[cite: 336], and European Parliament discussions (2017)[cite: 337]. Existing product liability laws may apply but could be controversial for complex robots like AVs or prostheses, potentially deterring development if too strict[cite: 338, 339, 340, 341, 342, 343].</p>
+                <p>Minimizing privacy and security risks is a challenge. Data used to train robots could be misused, or robots could be hacked. Data ownership is also a question (end-user, manufacturer, or developer?). Asimov's Laws are guiding principles but may need adaptation for varied modern robots (e.g., military robots potentially violating Law 1). Laws may need to differ by context (drones vs. manufacturing robots). Professor Frank Pasquale proposed additional principles: AI should complement, not replace professionals; not counterfeit humanity; not intensify arms races; and systems must indicate their creator/controller/owner. Governments are working on legislation: South Korea's Robot Ethics Charter (2007), UK's ethical design standards (2016), EU's RoboLaw project (concluded 2014), and European Parliament discussions (2017). Existing product liability laws may apply but could be controversial for complex robots like AVs or prostheses, potentially deterring development if too strict.</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Displacement of Humans</h4>
-                <p>Robots impact the workplace by replacing jobs or working alongside humans[cite: 356]. Oxford Economics predicted up to 20 million global manufacturing jobs could be replaced by robots by 2030[cite: 357]. Automation affects lower-skilled jobs, with workers moving to other sectors also facing automation[cite: 357, 358]. Industries with repetitive, predictable tasks (e.g., food industry) are susceptible[cite: 361]. Education and healthcare may see more cobots[cite: 361], where they assist humans (e.g., medical assistants, law enforcement patrols [cite: 362, 363, 364]). Even with cobots, some lower-skilled tasks will be replaced[cite: 365]. New jobs will be created (robot engineers, technicians, sales, software developers, operators [cite: 366, 367]).</p>
+                <p>Robots impact the workplace by replacing jobs or working alongside humans. Oxford Economics predicted up to 20 million global manufacturing jobs could be replaced by robots by 2030. Automation affects lower-skilled jobs, with workers moving to other sectors also facing automation. Industries with repetitive, predictable tasks (e.g., food industry) are susceptible. Education and healthcare may see more cobots, where they assist humans (e.g., medical assistants, law enforcement patrols). Even with cobots, some lower-skilled tasks will be replaced. New jobs will be created (robot engineers, technicians, sales, software developers, operators).</p>
                 <h4 class="text-lg font-semibold mt-3 mb-1 text-sky-400">Robot Rights and Consciousness</h4>
-                <p>As robots advance, their rights are debated, especially concerning machine consciousness (requiring strong AI [cite: 248, 258, 259]). Claims for rights often center on consciousness, which we experience and know exists[cite: 259, 260]. Rights often protect from pain; humans are programmed to learn fairness[cite: 261, 262]. Questions arise: If a robot becomes self-aware, does it deserve rights? Can they feel pain/pleasure, especially if programmed to or if they develop these via deep learning?[cite: 264, 265, 266].</p>
+                <p>As robots advance, their rights are debated, especially concerning machine consciousness (requiring strong AI). Claims for rights often center on consciousness, which we experience and know exists. Rights often protect from pain; humans are programmed to learn fairness. Questions arise: If a robot becomes self-aware, does it deserve rights? Can they feel pain/pleasure, especially if programmed to or if they develop these via deep learning?.</p>
             `
         }
     ],
     quiz: {
       id: 'quiz-robotics-autonomy',
       title: 'Robotics & Autonomous Tech Quiz',
-      points: 50, // Overall points for attempting this quiz section
+      points: 50, 
       questions: [
-        { id: 'ratq1', type: 'mcq', text: 'What is the fundamental definition of a robot according to the provided material?', options: ['Any machine that uses electricity', 'A programmable machine capable of performing tasks with minimal or no human intervention', 'A human-like machine with AI', 'A remote-controlled device'], correctAnswer: 'A programmable machine capable of performing tasks with minimal or no human intervention', explanation: 'A robot is a programmable machine capable of performing tasks with minimal or no human intervention[cite: 405, 499].', points: 10 },
-        { id: 'ratq2', type: 'mcq', text: 'What is a key difference between service robots and social robots?', options: ['Service robots are only for industrial use', 'Social robots cannot move', 'Service robots assist with tasks, social robots are for interaction/communication', 'Only social robots use AI'], correctAnswer: 'Service robots assist with tasks, social robots are for interaction/communication', explanation: 'Service robots assist humans with undesirable tasks[cite: 408, 500], while social robots are designed for social interaction and communication[cite: 409, 501].', points: 10 },
-        { id: 'ratq3', type: 'mcq', text: 'Which set of sensors is primarily used by autonomous vehicles for detailed environmental mapping and object detection?', options: ['Microphones and chemical sensors', 'GPS and temperature sensors', 'Lidar, sonar, and radar', 'Pressure sensors and light sensors'], correctAnswer: 'Lidar, sonar, and radar', explanation: 'More sophisticated autonomous vehicles use lidar, sonar, and radar for detailed environmental mapping and object detection[cite: 462].', points: 10 },
-        { id: 'ratq4', type: 'mcq', text: 'The "uncanny valley" refers to:', options: ['A scenic route for testing autonomous vehicles', 'The optimal point of robot efficiency', 'An unsettling feeling people get from very lifelike humanoid robots', 'A type of sensor used in robotics'], correctAnswer: 'An unsettling feeling people get from very lifelike humanoid robots', explanation: 'The uncanny valley describes the eerie, unsettling feeling people get when they interact with lifelike humanoid robots or lifelike computer-generated characters[cite: 415, 504].', points: 10 },
-        { id: 'ratq5', type: 'mcq', text: 'How does machine learning primarily contribute to robot advancements like walking or object recognition?', options: ['By providing stronger motors for movement', 'By enabling robots to learn from data and improve performance', 'By making robots lighter', 'By giving robots pre-programmed emotional responses'], correctAnswer: 'By enabling robots to learn from data and improve performance', explanation: 'Machine learning enables robots to learn from data and improve their performance, such as in walking abilities or enhancing object recognition[cite: 506, 507, 508].', points: 10 },
-        { id: 'ratq6', type: 'mcq', text: 'What are "cobots" primarily designed for?', options: ['Replacing all human workers in factories', 'Performing tasks humans find too complex', 'Working alongside humans to augment their capabilities', 'Exclusively for military applications'], correctAnswer: 'Working alongside humans to augment their capabilities', explanation: 'Cobots are robots designed to work alongside humans and augment their capabilities[cite: 293, 541].', points: 10 },
-        { id: 'ratq7', type: 'mcq', text: 'Which of these is a major ethical consideration regarding the increasing use of robots in society, according to the text?', options: ['Robots demanding higher wages', 'The potential for job displacement of human workers', 'Robots requiring too much electricity', 'Robots becoming too friendly'], correctAnswer: 'The potential for job displacement of human workers', explanation: 'A significant dilemma is job displacement, as automation can replace human workers in various industries[cite: 458, 511].', points: 10 },
-        { id: 'ratq8', type: 'mcq', text: 'Who first introduced the term "robot" in a science fiction play?', options: ['Isaac Asimov', 'William Grey Walter', 'Karel Capek', 'Charles Rosen'], correctAnswer: 'Karel Capek', explanation: 'Czech writer Karel Capek introduced the term "robot" in his 1921 play Rossum\'s Universal Robots[cite: 217, 439].', points: 10 },
-        { id: 'ratq9', type: 'mcq', text: 'According to Asimov\'s First Law of Robotics, a robot must not:', options: ['Obey orders from humans', 'Protect its own existence', 'Injure a human being or, through inaction, allow a human being to come to harm', 'Develop emotions'], correctAnswer: 'Injure a human being or, through inaction, allow a human being to come to harm', explanation: 'Asimov\'s First Law states: A robot must not injure a human being or, through inaction, allow a human being to come to harm[cite: 474].', points: 10 },
-        { id: 'ratq10', type: 'mcq', text: 'What does "anthropomorphism" mean in the context of robotics?', options: ['The study of robot mechanics', 'Attributing human characteristics to robots', 'The programming language used for robots', 'The fear of robots'], correctAnswer: 'Attributing human characteristics to robots', explanation: 'Anthropomorphism is the attribution of human characteristics to non-human entities, such as robots[cite: 277, 539].', points: 10 },
+        { id: 'ratq1', type: 'mcq', text: 'What is the fundamental definition of a robot according to the provided material?', options: ['Any machine that uses electricity', 'A programmable machine capable of performing tasks with minimal or no human intervention', 'A human-like machine with AI', 'A remote-controlled device'], correctAnswer: 'A programmable machine capable of performing tasks with minimal or no human intervention', explanation: 'A robot is a programmable machine capable of performing tasks with minimal or no human intervention.', points: 10 },
+        { id: 'ratq2', type: 'mcq', text: 'What is a key difference between service robots and social robots?', options: ['Service robots are only for industrial use', 'Social robots cannot move', 'Service robots assist with tasks, social robots are for interaction/communication', 'Only social robots use AI'], correctAnswer: 'Service robots assist with tasks, social robots are for interaction/communication', explanation: 'Service robots assist humans with undesirable tasks, while social robots are designed for social interaction and communication.', points: 10 },
+        { id: 'ratq3', type: 'mcq', text: 'Which set of sensors is primarily used by autonomous vehicles for detailed environmental mapping and object detection?', options: ['Microphones and chemical sensors', 'GPS and temperature sensors', 'Lidar, sonar, and radar', 'Pressure sensors and light sensors'], correctAnswer: 'Lidar, sonar, and radar', explanation: 'More sophisticated autonomous vehicles use lidar, sonar, and radar for detailed environmental mapping and object detection.', points: 10 },
+        { id: 'ratq4', type: 'mcq', text: 'The "uncanny valley" refers to:', options: ['A scenic route for testing autonomous vehicles', 'The optimal point of robot efficiency', 'An unsettling feeling people get from very lifelike humanoid robots', 'A type of sensor used in robotics'], correctAnswer: 'An unsettling feeling people get from very lifelike humanoid robots', explanation: 'The uncanny valley describes the eerie, unsettling feeling people get when they interact with lifelike humanoid robots or lifelike computer-generated characters.', points: 10 },
+        { id: 'ratq5', type: 'mcq', text: 'How does machine learning primarily contribute to robot advancements like walking or object recognition?', options: ['By providing stronger motors for movement', 'By enabling robots to learn from data and improve performance', 'By making robots lighter', 'By giving robots pre-programmed emotional responses'], correctAnswer: 'By enabling robots to learn from data and improve performance', explanation: 'Machine learning enables robots to learn from data and improve their performance, such as in walking abilities or enhancing object recognition.', points: 10 },
+        { id: 'ratq6', type: 'mcq', text: 'What are "cobots" primarily designed for?', options: ['Replacing all human workers in factories', 'Performing tasks humans find too complex', 'Working alongside humans to augment their capabilities', 'Exclusively for military applications'], correctAnswer: 'Working alongside humans to augment their capabilities', explanation: 'Cobots are robots designed to work alongside humans and augment their capabilities.', points: 10 },
+        { id: 'ratq7', type: 'mcq', text: 'Which of these is a major ethical consideration regarding the increasing use of robots in society, according to the text?', options: ['Robots demanding higher wages', 'The potential for job displacement of human workers', 'Robots requiring too much electricity', 'Robots becoming too friendly'], correctAnswer: 'The potential for job displacement of human workers', explanation: 'A significant dilemma is job displacement, as automation can replace human workers in various industries.', points: 10 },
+        { id: 'ratq8', type: 'mcq', text: 'Who first introduced the term "robot" in a science fiction play?', options: ['Isaac Asimov', 'William Grey Walter', 'Karel Capek', 'Charles Rosen'], correctAnswer: 'Karel Capek', explanation: 'Czech writer Karel Capek introduced the term "robot" in his 1921 play Rossum\'s Universal Robots.', points: 10 },
+        { id: 'ratq9', type: 'mcq', text: 'According to Asimov\'s First Law of Robotics, a robot must not:', options: ['Obey orders from humans', 'Protect its own existence', 'Injure a human being or, through inaction, allow a human being to come to harm', 'Develop emotions'], correctAnswer: 'Injure a human being or, through inaction, allow a human being to come to harm', explanation: 'Asimov\'s First Law states: A robot must not injure a human being or, through inaction, allow a human being to come to harm.', points: 10 },
+        { id: 'ratq10', type: 'mcq', text: 'What does "anthropomorphism" mean in the context of robotics?', options: ['The study of robot mechanics', 'Attributing human characteristics to robots', 'The programming language used for robots', 'The fear of robots'], correctAnswer: 'Attributing human characteristics to robots', explanation: 'Anthropomorphism is the attribution of human characteristics to non-human entities, such as robots.', points: 10 },
       ]
     }
   }
@@ -780,17 +780,7 @@ const modulesData = [
 
 // --- UI Components ---
 // Header, Sidebar, Dashboard, ModuleView, QuizView, App, WrappedApp
-// (These will be the same as the last full version, ensuring Bot is imported in lucide-react imports)
-// For brevity, I'm not re-pasting all UI components here but they are assumed to be the same
-// as in the last full code block you received, with the addition of Bot to the lucide-react import line.
-// The Canvas block with ID ai_ib_workbook_react_email_auth will have the full updated code.
-
-// ... (ensure all UI components like Header, Sidebar, Dashboard, ModuleView, QuizView, SocraticTutorModal are here)
-// ... (ensure App and WrappedApp are here)
-
-// For this response, I'm re-pasting just the `App` and `WrappedApp` for context, 
-// assuming other components are as per the last complete code block you successfully ran.
-// The FULL code with ALL components is in the Canvas block.
+// (These will be the same as the last full version, ensuring Bot and AlertTriangle are imported in lucide-react imports)
 
 function Header({ currentModuleTitle }) {
   const { user, appSignOut } = useContext(AuthContext);
@@ -948,7 +938,7 @@ function Dashboard({ modules, onSelectModule, userData }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {modules.map(module => {
           const Icon = module.icon || Lightbulb;
-          const isModuleCompleted = !module.quizType && userData?.completedQuizzes?.some(q => q.quizId === module.quiz?.id); // Added optional chaining for module.quiz.id
+          const isModuleCompleted = !module.quizType && userData?.completedQuizzes?.some(q => q.quizId === module.quiz?.id); 
           return (
             <div
               key={module.id}
@@ -976,19 +966,21 @@ function ModuleView({ module, onGenerateLiveQuiz }) {
   const { userData, markLessonCompleted } = useContext(UserDataContext);
 
   useEffect(() => { 
+    console.log("ModuleView useEffect: Resetting state for module:", module?.title); // DEBUG LOG
     setCurrentLessonIndex(0);
     setShowQuiz(false);
   }, [module]);
 
-  // Ensure module and module.lessons exist before trying to access currentLesson
   if (!module || !module.lessons || module.lessons.length === 0) {
-      return <div className="p-6 text-slate-400">Module data or lessons are missing.</div>;
+      console.error("ModuleView: Module data or lessons are missing for module:", module); // DEBUG LOG
+      return <div className="p-6 text-slate-400">Module data or lessons are missing. Please select another module or check the data.</div>;
   }
   const currentLesson = module.lessons[currentLessonIndex];
   if (!currentLesson) {
-      // This case should ideally not be reached if lessons array is checked
+      console.error("ModuleView: Current lesson not found for module:", module?.title, "at index:", currentLessonIndex); // DEBUG LOG
       return <div className="p-6 text-slate-400">Current lesson not found.</div>;
   }
+  console.log("ModuleView rendering. Module:", module?.title, "Current lesson:", currentLesson?.title); // DEBUG LOG
 
 
   const handleNextLesson = () => {
@@ -1027,7 +1019,7 @@ function ModuleView({ module, onGenerateLiveQuiz }) {
     realWorld: <Users size={24} className="mr-2 text-green-400" />,
     stakeholders: <MessageSquare size={24} className="mr-2 text-yellow-400" />,
     evolution: <BookOpen size={24} className="mr-2 text-indigo-400" />,
-    dilemmas: <AlertTriangle size={24} className="mr-2 text-red-400" /> // Added AlertTriangle, import it if not already
+    dilemmas: <AlertTriangle size={24} className="mr-2 text-red-400" /> 
   };
 
   return (
@@ -1523,7 +1515,7 @@ function App() {
         const response = await fetch('/.netlify/functions/generate-quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ topic: topic, numMCQs: 2, numSAQs: 1 }), 
+            body: JSON.stringify({ topic: topic, numMCQs: 2, numSAQs: 1 }), // Example: 2 MCQs, 1 SAQ for module quizzes
         });
         if (!response.ok) {
             const errData = await response.json();
@@ -1666,3 +1658,4 @@ export default function WrappedApp() {
     </AuthProvider>
   );
 }
+
